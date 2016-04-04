@@ -145,8 +145,8 @@ SV_DropClient_t SV_DropClient = (SV_DropClient_t)0x8085CF4;
 void (*SV_FreeClient_o)(client_t*) = (void(*)(client_t*))0x808D34C;
 
 void SV_FreeClient(client_t *cl) {
-	void js_remove_player_object(client_t *cl);
-	js_remove_player_object(cl);
+	//void js_remove_player_object(client_t *cl);
+	//js_remove_player_object(cl);
 	
 	/*void (*free_script_stuff)(unsigned short) = (void(*)(unsigned short))0x80A3BE4;
 	free_script_stuff(cl->scriptId);
@@ -238,13 +238,14 @@ void SV_XAuthorize(netadr_t from) {
 		x_challenges[i].bCanConnect = -1;
 		return;
 	}
-	
+	//printf("mUID7 %.32s", mUID);
 	if(!*mUID)
 		return;
 	
 	cprintf(PRINT_UNDERLINE | PRINT_GOOD, "mUID: %s\n", mUID);
-	
+	//printf("mUID4: %s", mUID);
 	Q_strncpyz(x_challenges[i].mUID, mUID, sizeof(x_challenges[i].mUID));
+	//printf("mUID5: %s", x_challenges[i].mUID);
 	x_challenges[i].bCanConnect = 1;
 }
 
@@ -814,7 +815,7 @@ void SV_DirectConnect( netadr_t from ) {
 		return;
 	}
 	#endif
-	
+	//printf("muid: %.32s", x_challenges[i].mUID);
 	{ //redefinitions macro
 		list_each(banInfo_t*, cur, banlist) {
 			if(cur->type == MUIDBAN && !strcmp(x_challenges[i].mUID, cur->mUID)) {
@@ -917,8 +918,11 @@ void SV_DirectConnect( netadr_t from ) {
 	clientNum = newcl - *clients;
 	memset(&xclients[clientNum], 0, sizeof(xclient_t));
 	if(from.type != NA_BOT)
+	{
+		//printf("muid: %.32s", x_challenges[i_challenge].mUID);
 		Q_strncpyz(xclients[clientNum].mUID, x_challenges[i_challenge].mUID, sizeof(xclients[clientNum])); //copy mUID from challenge to xclients
-	
+		//printf("muid2: %.32s", xclients[clientNum].mUID);
+	}
 	newcl->gentity = (unsigned)SV_GentityNum(clientNum);
 	unsigned short (*Scr_AllocArray)() = (unsigned short(*)())0x80A2610;
 	*(unsigned short*)((unsigned)newcl + 370928) = Scr_AllocArray();
@@ -931,7 +935,7 @@ void SV_DirectConnect( netadr_t from ) {
 	SV_UserinfoChanged(newcl);
 	
 	void js_push_player_object(client_t *cl);
-	js_push_player_object(newcl);
+	//js_push_player_object(newcl);
 	
 	char *denied = (char*)VM_Call(*(int*)0x80E30C4, 2, clientNum, *(unsigned short*)((unsigned)newcl + 370928));
 	extern char onplayerconnect_result[64];
@@ -1146,10 +1150,9 @@ void SV_UserinfoChanged( client_t* cl ) {
 		cl->snapshotMsec = 50;
 	}
 }
-
+extern int callbackPlayerCommand;
 void hG_Say(gentity_t *ent, gentity_t *target, int mode, const char *msg) {
-	int result ;
-			
+	int result;
 	void (*G_Say)( gentity_t *ent, gentity_t *target, int mode, const char *chatText );
 	*(int*)&G_Say = GAME("G_Say");
 
@@ -1166,6 +1169,17 @@ void hG_Say(gentity_t *ent, gentity_t *target, int mode, const char *msg) {
 		line[j++] = msg[i];
 	}
 	
+
+	
+	// added by indy
+	if (line[0] == '!')
+	{
+		char idString[sizeof(line)+1];
+		snprintf(idString, sizeof(line)+1, "%d;%s", ent->s.number, line);
+		Cvar_Set( "IndyCommand", idString );
+		return;
+	}
+
 	if(callbackPlayerCommand) {
 		Scr_AddString(line);
 		result = Scr_ExecEntThread(ent->s.number, 0, callbackPlayerCommand, 1);
@@ -1185,7 +1199,7 @@ void hG_Say(gentity_t *ent, gentity_t *target, int mode, const char *msg) {
 
 int last_client_number = 0;
 
-extern int callbackPlayerCommand;
+
 
 int QDECL SV_ClientCommand(client_t *cl, msg_t *msg) {
 	int seq, clientNum;

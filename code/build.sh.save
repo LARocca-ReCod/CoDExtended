@@ -2,7 +2,7 @@
 
 cc="gcc -include inc.h -I/home/r/deps"
 #LINK_LIBS="$(/usr/bin/curl-config --static-libs --cflags)";
-LINK_LIBS="$(mysql_config --cflags --libs)"
+LINK_LIBS=""
 STEAM_INCLUDE=""
 STEAM_LINK=""
 
@@ -119,7 +119,7 @@ else
 DEFINES+="-DCODPATCH=1 "
 fi
 
-params="$DEFINES -std=c99 -I. -m32 -fPIC -Wno-write-strings -DSTEAM_SUPPORT=0"
+params="$DEFINES -std=c99 -I. -m32 -fPIC -Wno-write-strings"
 #params="-m32 -fPIC -Wno-write-strings"
 
 mkdir -p bin
@@ -169,7 +169,6 @@ $compiler $params -c sv_main.c -o obj/sv_main.o
 $compiler $params -c x_clientcmds.c -o obj/x_clientcmds.o
 $compiler $params -c unix_net.c -o obj/unix_net.o
 $compiler $params -c webserver.c -o obj/webserver.o
-# g++ -include inc.h -Os -O1 -O3 -s -fvisibility=hidden -w -Wl,--exclude-libs,ALL -I. -m32 -fPIC -Wno-write-strings $STEAM_INCLUDE -c steam.cpp -o obj/steam.o
 echo "[SCRIPT]"
 $compiler $params -c pre.c -o obj/pre.o
 $compiler $params -c scr_method_player.c -o obj/scr_method_player.o
@@ -207,16 +206,16 @@ obj="$(ls obj/*.o)"
 
 if [ $uMYSQL = true ]; then
 if [ $DEBUG = true ]; then
-$compiler -m32 -shared -L/lib32 -L/home/lib -lmysqlclient -L/usr/lib/mysql -I/usr/include/mysql -o ./bin/codextended.so $obj -Os -lz $LINK_LIBS $STEAM_LINK -ldl -lm -Wall -g
+$compiler -m32 -shared -L/lib32 -L/home/lib -lmysqlclient -L/usr/lib/mysql -I/usr/include/mysql -o ./bin/codextended.so $obj -Os -lz $LINK_LIBS $STEAM_LINK -ldl -lm -Wall
 else
-$compiler -m32 -shared -L/lib32 -L/home/lib -lmysqlclient -L/usr/lib/mysql -I/usr/include/mysql -o ./bin/codextended.so $obj -Os -s -lz $LINK_LIBS $STEAM_LINK -ldl -lm -Wall -g
+$compiler -m32 -shared -L/lib32 -L/home/lib -lmysqlclient -L/usr/lib/mysql -I/usr/include/mysql -o ./bin/codextended.so $obj -Os -s -lz $LINK_LIBS $STEAM_LINK -ldl -lm -Wall
 fi
 #$compiler -m32 -shared -L/lib32 `mysql_config --libs` -I/usr/include/mysql -o ./bin/codextended.so $obj -Os -s -lz $LINK_LIBS -ldl -lm -Wall
 else
 if [ $DEBUG = true ]; then
-$compiler -m32 -shared -L/lib32 -L./lib -o ./bin/codextended.so $obj -lz $LINK_LIBS $STEAM_LINK -ldl -lm -Wall -g
+$compiler -m32 -shared -L/lib32 -L./lib -o ./bin/codextended.so $obj -lz $LINK_LIBS $STEAM_LINK -ldl -lm -Wall
 else
-$compiler -m32 -shared -L/lib32 -L./lib -o ./bin/codextended.so $obj -Os -s -lz $LINK_LIBS $STEAM_LINK -ldl -lm -Wall -g
+$compiler -m32 -shared -L/lib32 -L./lib -o ./bin/codextended.so $obj -Os -s -lz $LINK_LIBS $STEAM_LINK -ldl -lm -Wall
 fi
 fi
 #rm -rf ./obj

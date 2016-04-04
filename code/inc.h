@@ -397,7 +397,6 @@ extern x##_t x
 #define Q_stricmp xtn_Q_stricmp
 #define FS_IsExtendedFile xtn_FS_IsExtendedFile
 #define g_scr_data xtn_g_scr_data
-#define x_cl_adsair xtn_x_cl_adsair
 #define SV_Kick_f xtn_SV_Kick_f
 #define ucmd_ascii xtn_ucmd_ascii
 #define Com_Error xtn_Com_Error

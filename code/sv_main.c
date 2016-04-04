@@ -16,7 +16,6 @@
 */
 
 #include "server.h"
-#include "steamwrapper.h"
 
 #define MAX_MSGLEN 32000
 
@@ -148,7 +147,7 @@ void SV_NocPacket(netadr_t from, msg_t *msg) { //Not connected packet (Server is
 	char* c;
 	if(msg->cursize >= 4) {
 		if(*(int*)msg->data == -1) {
-			#if 1
+			#if 0
 			int CSteamServer_HandleIncomingPacket(const void* pData, int cbData, unsigned int srcIP, unsigned short srcPort);
 			if(!CSteamServer_HandleIncomingPacket((const void*)msg->data, msg->cursize, from._ip, from.port));
 			#endif
@@ -546,5 +545,5 @@ void SV_Frame(int msec) {
 
 	o(msec);
 
-	CSteamServer_RunFrame();
+	//CSteamServer_RunFrame();
 }

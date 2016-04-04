@@ -190,9 +190,6 @@ void SV_Init( void ) {
 	}
 	#endif
 	
-	extern cvar_t *x_cl_adsair;
-	x_cl_adsair = Cvar_Get("x_cl_adsair", "1", 0);
-	
 	cvar_t *x_nopbots = Cvar_Get("x_nopbots", "0", 0);
 	/*
 		NOP SV_BotUsermove calls

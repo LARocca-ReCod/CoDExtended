@@ -473,7 +473,7 @@ void PlayerCmd_isbot(int);
 void PlayerCmd_SendServerCommand(int);
 void PlayerCmd_SendGamestate(int);
 void PlayerCmd_ispure(int a1);
-void PlayerCmd_GetMUID(unsigned);
+void PlayerCmd_GetMUID(int self);
 void PlayerCmd_SetPerk(int);
 void PlayerCmd_UnsetPerk(int);
 void PlayerCmd_HasPerk(int);

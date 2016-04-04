@@ -69,21 +69,23 @@ void PlayerCmd_HasPerk(int self) {
 		printf("ERROR: HasPerk() '%s' was not found!\n", SL_ConvertToString(perk));
 }
 
-void PlayerCmd_GetMUID(unsigned n) {
-	if(n >= MAX_ENTITIES) {
-		Scr_Error(va("%i is not a valid entity number", n));
-		return;
-	}
-	
-	gentity_t *ent = &g_entities[n];
-	
-	if(!ent->client) {
-		Scr_Error(va("entity %i is not a player", n));
-		return;
-	}
-	
-	Scr_AddString(xclients[n].mUID);
+void PlayerCmd_GetMUID(int self) {
+int id = Scr_GetInt(0);
+/*if(n >= MAX_ENTITIES) {
+Scr_Error(va("%i is not a valid entity number", n));
+return;
 }
+
+gentity_t *ent = &g_entities[n];
+
+if(!ent->client) {
+Scr_Error(va("entity %i is not a player", n));
+return;
+}*/
+Scr_AddString("muh");
+//Scr_AddString(xclients[id].mUID);
+}
+
 
 void PlayerCmd_renamebot(int a1) {
 	char* key = Scr_GetString(0);

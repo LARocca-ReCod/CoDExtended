@@ -39,6 +39,6 @@ loc_808E336: ; visible
 	jmp esi
 
 global TestGetAddr
-TestGetAddr
+TestGetAddr:
 	mov eax, SV_AddEntitiesVisibleFromPoint_Intercept
 	retn

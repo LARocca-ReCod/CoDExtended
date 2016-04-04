@@ -16,7 +16,6 @@
 */
 
 #include "script.h"
-#include "steamwrapper.h"
 
 /*
 	:: Scr_GetFunction/GetMethod ::
@@ -2338,7 +2337,6 @@ void scriptInitializing() {
 	memcpy((void*)&rct_bytes[0], (void*)GAME("Scr_RunCurrentThreads"), 5);
 	__jmp(GAME("Scr_RunCurrentThreads"), (unsigned)_Scr_RunCurrentThreads);
 	
-	if(CSteamServer_Init(INADDR_ANY, 8766, 28960, 25011, "1.0.0.0"));
 	/*
 		printf("CSteamServer_Init worked\n");
 	else

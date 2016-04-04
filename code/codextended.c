@@ -35,7 +35,6 @@
 #include "server.h"
 #include "surfaceflags.h"
 #include "js.h"
-#include "steamwrapper.h"
 
 #ifdef uMYSQL
 MYSQL *db = NULL;
@@ -63,12 +62,6 @@ void uCoDExtended() {
 
 	void WebServer_Stop();
 	WebServer_Stop();
-
-	#ifdef STEAM_SUPPORT
-	CSteamServer_Shutdown();
-	CSteamClient_Shutdown();
-	#endif
-
 	
 	if(logfile != NULL)
 		fclose(logfile);
@@ -232,15 +225,6 @@ void CoDExtended() {
 	srand (time(NULL));
 	//mtrace();
 
-	#ifdef STEAM_SUPPORT
-	
-	#define STEAM_APPID "203300"
-	//#define STEAM_APPID "42750"
-	
-	putenv("SteamGameId=" STEAM_APPID);
-	putenv("SteamAppId=" STEAM_APPID);
-	
-	#endif
 
 	x_mastername[0] = 'c';
 	x_mastername[1] = 'o';
