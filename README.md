@@ -4,7 +4,9 @@ CoDExtended is free software: you can redistribute it and/or modify it under the
 
 ====
 
-Call of Duty Extended is a modification for Call of Duty 1, which does what it says it extends CoD with new features, increasing limits and fixing bugs.
+Call of Duty Extended is a modification for Call of Duty 1, which does what it says it extends CoD with new features, increasing limits and fixing bugs. 
+
+With this custom version of CoDExtended, bugs are fixed, crashes are eliminated, unnecessary things are removed, and chat commands are redone.
 
 # Usage
 
@@ -15,20 +17,20 @@ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:. LD_PRELOAD=/path/to/codextended.so ./cod_lnxd
 
 Install GCC and libs if you haven't yet with
 apt-get install build-essential
-
+run build.sh
 [ If you're on x86_64 then you would add :i386 after the library package names ]
 
-Then download and place the dependencies listed under here in the respective directories.
-
-SteamSDK, Duktape
+OR use the codextended.so (no debug and no mysql) in /code/bin/
 
 # Questions
 
-If you have any question post a new thread or PM me on http://xtnded.org
-or add me on steam.
+If you have any questions, add me on steam.
 
-Steam: riicchhaarrd
+Steam: indyanz
+
+# Bugs
+- Invisible models (kinda rare)
 
 ====
 
-Thanks to kung foo man (http://killtube.org) and his libcod project (CoD 2 memory modification) (https://github.com/kungfooman/libcod)
+Thanks to php (cod1.eu),  and kung foo man (http://killtube.org) for his libcod project (CoD 2 memory modification) (https://github.com/kungfooman/libcod)
