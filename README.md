@@ -6,9 +6,17 @@ CoDExtended is free software: you can redistribute it and/or modify it under the
 
 Call of Duty Extended is a modification for Call of Duty 1, which does what it says it extends CoD with new features, increasing limits and fixing bugs. 
 
-# Update
+# Updates
 
 With this custom version of CoDExtended, bugs are fixed, crashes are eliminated, unnecessary things are removed, and chat commands are redone.
+
+To use the chat commands:
+- Add _chat.gsc and _cmds.gsc to server's Main folder 
+- Add thread _chat.gsc::init(); on startGametype
+- Modify _cmds.gsc to your liking
+
+Todo:
+- Add login system for admins
 
 # Usage
 
