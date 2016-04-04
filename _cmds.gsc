@@ -2,7 +2,7 @@
 init()
 {
 	// Add commands here
-	zombies\_chat::add_chat_command("!name", ::chatcmd_name);
+	thread _chat::add_chat_command("!name", ::chatcmd_name);
 }
 
 chatcmd_name(tok)
