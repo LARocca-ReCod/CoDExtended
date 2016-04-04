@@ -1,95 +1,79 @@
-init()
-{
-	// load chat commands
-	thread _cmds::init();
-	
-	printconsole("\nchat module loaded\n\n");
-	for(;;) 
-	{
-        chatcmd = getCvar("IndyCommand");
-        if (chatcmd != "")
-		{
-        	setcvar("IndyCommand", "");
-            thread parseChat(chatcmd);
-        }
-        wait .05;
-    }
 
+init() {
+
+	// todo: partial name matching system-> remove id -requirement- for argument
+
+	// Add commands here
+	// <cmd> , <call> , <admin> , <info>
+	thread [[ level.chatCallback  ]] ( "!ebot"			, 	::chatcmd_ebot							, 0 ,	"Trigger e^2BOT ^7commands"	);
+	thread [[ level.chatCallback  ]] ( "!login"			, 	::chatcmd_login							, 0 ,	"Access admin commands"		);
+	
+	thread [[ level.chatCallback  ]] ( "!help"			, 	::chatcmd_help							, 1 ,	"List of commands" 			);
+	thread [[ level.chatCallback  ]] ( "!status" 		, 	::chatcmd_status  						, 1 ,	"Print players info" 		);
+	thread [[ level.chatCallback  ]] ( "!say" 			,	::chatcmd_rconsay 						, 1 ,	"Talk as console" 			);
+	
+	thread [[ level.chatCallback  ]] ( "!shout" 		,	maps\mp\gametypes\_admin::say 			, 1 ,	"Shout a message"			);
+	thread [[ level.chatCallback  ]] ( "!rename" 		, 	maps\mp\gametypes\_admin::rename 		, 1 ,	"Rename player" 			);
+	thread [[ level.chatCallback  ]] ( "!id" 			, 	maps\mp\gametypes\_admin::getid 		, 1 ,	"Get GUID"					);
+	thread [[ level.chatCallback  ]] ( "!kill" 			, 	maps\mp\gametypes\_admin::kill 			, 1 ,	"Kill player" 				);
+	thread [[ level.chatCallback  ]] ( "!endgame"   	,	maps\mp\gametypes\_admin::endGame 		, 1 ,	"End the map" 				);
+	
+	thread [[ level.chatCallback  ]] ( "!givewep" 	, 		maps\mp\gametypes\_admin::giveWeap  	, 1 ,	"Give a weapon" 			);
+	thread [[ level.chatCallback  ]] ( "!drop" 		, 		maps\mp\gametypes\_admin::drop 			, 1 ,	"Drop a player" 			);
+	thread [[ level.chatCallback  ]] ( "!giveks" 	,		maps\mp\gametypes\_admin::giveks 		, 1 ,	"Give a killstreak" 		);
+	thread [[ level.chatCallback  ]] ( "!givearmor" , 		maps\mp\gametypes\_admin::givearmor 	, 1 ,	"Give armor" 				);
+
+	thread [[ level.chatCallback  ]] ( "!givexp" 		, 	maps\mp\gametypes\_admin::giveXp 		, 1 ,	"Give XP" 					);
+	thread [[ level.chatCallback  ]] ( "!givekills" 	, 	maps\mp\gametypes\_admin::giveKills		, 1 ,	"Give Kills" 				);
+	thread [[ level.chatCallback  ]] ( "!givepoints"	, 	maps\mp\gametypes\_admin::givePoints 	, 1 ,	"Give Points" 				);
+
+	thread [[ level.chatCallback  ]] ( "!updatexp" 		, 	maps\mp\gametypes\_admin::updatexp 		, 1 ,	"Update XP" 				);
+	thread [[ level.chatCallback  ]] ( "!updatekills" 	, 	maps\mp\gametypes\_admin::updatekills 	, 1 ,	"Update Kills" 				);
+	
+	thread [[ level.chatCallback  ]]( "!spank"			,	maps\mp\gametypes\_admin::spank			, 1 ,	"Spank a player" 			);
+	thread [[ level.chatCallback  ]]( "!slap"			, 	maps\mp\gametypes\_admin::slap			, 1 ,	"Slap a player" 			);
+	
 }
 
-parseChat( msg )
-{
-	if (!isDefined(msg) || msg.size < 1)
-		return;
-	chatmsg = sttok(msg, ";");
-	if (chatmsg.size < 1)
-		return;
-	id = (int)chatmsg[0];
-	chat = chatmsg[1];
-	
-	chatcmd = sttok(chat, " ");
-	//printconsole("\nchatcmd," + chatcmd[0]+"\n");
-	
-	player = getPlayerById(id);
-	if (!isDefined(player) || !isDefined(level.chatcommand))
-		return;
+chatcmd_ebot( tok ) {
+	cmd = "eBOT " + tok;
+	self setClientCvar( "name" , cmd );
+}
+
+chatcmd_login( tok ) {
+	if ( tok == getCvar ( "adminPassword" ) ) {
+		if ( isDefined ( self.pers[ "admin" ] ) ) {
+			iprintln ( "^1A^7lready ^2L^7ogged ^1I^7n" );
+			return;
+		}
 		
-	if(isdefined(level.chatcommand[chatcmd[0]])) 
-	{
-		command = "";
-		for(i = 1; i < chatcmd.size; i++) 
-		{
-			command += chatcmd[i] + " ";
-			wait .05;
-		}
-		player [[ level.chatcommand[chatcmd[0]].call]](command);
-	}
-	else
-		player iprintln("^1Command not found");
+		self.pers[ "admin" ] = 1;
+		self iprintln( " ^1L^7ogin ^2S^7uccessful " );
+		return;
+	} 
+	
+	self iprintln( " ^1L^7ogin ^1U^7nsuccessful " );
 }
 
-getPlayerById(id)
-{
-	player = undefined;
-	players = getEntArray("player", "classname");
-	for (i = 0; i < players.size; i++)
-	{
-		if (isDefined(players[i]) && players[i] getEntityNumber() == id)
-		{
-			player = players[i];
-			break;
-		}
+chatcmd_status ( tok ) {
+	players = getEntArray( "player", "classname" );
+	for (i = 0; i < players.size; i++) {
+		name = players[ i ].name;
+		id = players[ i ] getEntityNumber();
+		self iprintln(" ^1" + id + " ^2: ^7" + name );
+		wait .05;
 	}
-	return player;
 }
 
-// taken from php- todo- add admin system
-add_chat_command(cmd, call) 
-{
-	if(!isdefined(level.chatcommand)) 
-	{
-		level.chatcommand = [];
-		level.chatcommandsize = 0;
-	}
-    level.chatcommand[cmd] = spawnstruct();
-	level.chatcommand[cmd].call = call;
-    level.chatcommandsize++;
+chatcmd_rconsay ( tok ) {
+	sendservercommand("h \"console:^2"+tok+"\"");
 }
 
-StTok( s, delimiter )
-{
-	j = 0;
-	temparr[ j ] = "";	
-
-	for ( i = 0; i < s.size; i++ )
-	{
-		if ( s[ i ] == delimiter )
-		{
-			j++;
-			temparr[ j ] = "";
-		}
-		else
-			temparr[ j ] += s[i];
+chatcmd_help ( tok ) {
+	
+	for ( i = 0; i < level.helpcommand.size; i++ ) {
+		if ( isDefined( level.helpcommand[ i ]) )
+			self iprintln ( "^2" + level.helpcommand[ i ].cmd + " ^1: ^7" + level.helpcommand[ i ].info );
+		wait .05;
 	}
-	return temparr;
 }
