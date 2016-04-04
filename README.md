@@ -6,6 +6,8 @@ CoDExtended is free software: you can redistribute it and/or modify it under the
 
 Call of Duty Extended is a modification for Call of Duty 1, which does what it says it extends CoD with new features, increasing limits and fixing bugs. 
 
+# Update
+
 With this custom version of CoDExtended, bugs are fixed, crashes are eliminated, unnecessary things are removed, and chat commands are redone.
 
 # Usage
@@ -29,6 +31,7 @@ If you have any questions, add me on steam.
 Steam: indyanz
 
 # Bugs
+
 - Invisible models (kinda rare)
 
 ====
