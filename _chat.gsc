@@ -4,15 +4,14 @@ init()
 	thread _cmds::init();
 	
 	printconsole("\nchat module loaded\n\n");
-    for(;;) 
+	for(;;) 
 	{
         chatcmd = getCvar("IndyCommand");
         if (chatcmd != "")
 		{
-            setcvar("IndyCommand", "");
+        	setcvar("IndyCommand", "");
             thread parseChat(chatcmd);
         }
-
         wait .05;
     }
 
