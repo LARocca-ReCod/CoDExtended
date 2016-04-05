@@ -173,7 +173,7 @@ extern x##_t x
 #define SV_CoDExtended_f xtn_SV_CoDExtended_f
 #define Scr_Continue xtn_Scr_Continue
 #define _ColorBytes3 xtn__ColorBytes3
-#define pml xtn_pml
+//#define pml xtn_pml
 #define PlayerCmd_SetMoveSpeedScale xtn_PlayerCmd_SetMoveSpeedScale
 #define x_requireclient xtn_x_requireclient
 #define _ColorBytes4 xtn__ColorBytes4
@@ -386,7 +386,7 @@ extern x##_t x
 #define _AxisCopy xtn__AxisCopy
 #define sv_serverid xtn_sv_serverid
 #define colorGreen xtn_colorGreen
-#define pm xtn_pm
+//#define pm xtn_pm
 #define GScr_trap_Argv xtn_GScr_trap_Argv
 #define SV_UnbanGUID_f xtn_SV_UnbanGUID_f
 #define ClientBegin xtn_ClientBegin

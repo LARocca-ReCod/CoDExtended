@@ -69,14 +69,16 @@ void set_game_ptr( void *ret ) {
 	base = (int)dlsym(ret, "vmMain"); //0x4D84C
 	g_entities = (gentity_t*)dlsym(ret, "g_entities");
 	level = (level_locals_t*)GAME("level");
-	pml = (char (*)[140])dlsym(ret, "pml");
-	pm = (pmove_t*)dlsym(ret, "pm");
+	//pml = (char (*)[140])dlsym(ret, "pml");
+	//pm = (pmove_t*)dlsym(ret, "pm");
 	
+/* indy fix for invisible players?
 	void BG_Link();
 	BG_Link();
 	
 	void init_g_spawn();
 	init_g_spawn();
+*/
 	set_trap_func_ptr();
 	scriptInitializing();
 	

@@ -21,7 +21,7 @@ xentity_t xentities[1024];
 
 void* gamelib;
 int base;
-char (*pml)[140];
+//char (*pml)[140];
 
 level_locals_t *level;
 

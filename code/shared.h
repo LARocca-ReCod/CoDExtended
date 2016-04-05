@@ -1235,7 +1235,7 @@ void Info_SetValueForKey( char *s, const char *key, const char *value );
 
 extern void* gamelib;
 extern int base;
-extern char (*pml)[140];
+//extern char (*pml)[140];
 
 
 bool is_good_string(char* str);
