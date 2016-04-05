@@ -15,8 +15,12 @@ To use the chat commands:
 - Add thread _chat.gsc::init(); on startGametype
 - Modify _cmds.gsc to your liking
 
+Update 1:
+- To use the login system, in dedicated.cfg, add cvar set adminPassword "yourAdminPasswordHere"
+- In-game, admins can login with !login [yourAdminPasswordHere] 
+- Other commands can be found with !help
 Todo:
-- Add login system for admins
+- Add login system for admins (DONE)
 
 # Usage
 
