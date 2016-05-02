@@ -18,6 +18,58 @@
 #include "script.h"
 #include "steamwrapper.h"
 
+// numparams really is _required_ params
+int paramError = 0;
+bool paramCheck( int numParams, ... ) {
+    // too few
+    if ( Scr_GetNumParam() < numParams ) {
+        return false;
+    }
+
+    if ( Scr_GetNumParam() > numParams ) {
+        // we only really need to check the required params anyway
+    }
+
+    va_list args;
+    va_start( args, numParams );
+
+    int i, type;
+    for ( i = 0; i < numParams; i++ ) {
+        type = va_arg( args, int );
+
+        // wrong type
+        if ( type != Scr_GetType( i ) ) {
+            // we can have either ints or floats really
+            if ( type == VT_INT && Scr_GetType( i ) == VT_FLOAT )
+                //printf( "warning: loss of precision casting from int to float\n" );
+                continue;
+
+            if ( type == VT_FLOAT && Scr_GetType( i ) == VT_INT ) {
+                continue;
+            }
+
+            return false;
+        }
+    }
+
+    va_end( args );
+
+    return true;
+}
+
+void parameterError( const char *format, ... ) {
+    char buff[ 1024 ];
+
+    va_list args;
+    va_start( args, format );
+    vsprintf( buff, format, args );
+
+    printf( buff );
+    printf( "\n" );
+
+    va_end( args );
+}
+
 /*
 	:: Scr_GetFunction/GetMethod ::
 	
@@ -73,10 +125,8 @@ static scr_memberfield scr_client_memberfields[] = {
 };
 */
 
-void GScr_SendServerCommand(int a1);
 void PlayerCmd_SendConnectionlessPacket(int a1);
 void GScr_killserver(int);
-void GScr_typeof(int);
 
 void Scr_fuckPrecacheString(int a1);
 
@@ -193,88 +243,6 @@ void Scr_PassArray(int);
 
 void GScr_SetTempVec(unsigned n);
 
-SCRIPTFUNCTION scriptFunctions[] = {
-	//name, function, developer
-	
-	{"settempvec", GScr_SetTempVec, 0},
-	
-	#ifdef uMYSQL
-	//MYSQL
-    {"mysql_init", GScr_mysql_init, 0},
-    {"mysql_close", GScr_mysql_close, 0},
-    {"mysql_affected_rows", GScr_mysql_affected_rows, 0},
-    {"mysql_errno", GScr_mysql_errno, 0},
-    {"mysql_error", GScr_mysql_error, 0},
-    {"mysql_fetch_field", GScr_mysql_fetch_field, 0},
-    {"mysql_fetch_row", GScr_mysql_fetch_row, 0},
-    {"mysql_field_seek", GScr_mysql_field_seek, 0},
-    {"mysql_free_result", GScr_mysql_free_result, 0},
-    {"mysql_num_fields", GScr_mysql_num_fields, 0},
-    {"mysql_num_rows", GScr_mysql_num_rows, 0},
-    {"mysql_query", GScr_mysql_query, 0},
-    {"mysql_real_connect", GScr_mysql_real_connect, 0},
-    {"mysql_real_escape_string", GScr_mysql_real_escape_string, 0},
-    {"mysql_store_result", GScr_mysql_store_result, 0},
-    {"mysql_get_connection", GScr_mysql_get_connection, 0},
-	//MYSQL END
-	#endif
-	
-	/*
-		MATH
-	*/
-	
-	{"sqrt", Math_Scr_sqrt, 0},
-	
-	/*
-		STRING
-	*/
-	{"strtok", Scr_StrTok, 0},
-	{"issubstr", Scr_IsSubStr, 0},
-	{"tolower", Scr_ToLower, 0},
-	{"toupper", Scr_ToUpper, 0},
-	{"ucfirst", Scr_ucfirst, 0},
-	{"trim", Scr_trim, 0},
-	#ifdef xDEBUG
-	{"maketrail", MakeTrail, 0},
-	#endif
-	{"convert_string", Scr_convertToIString, 0},
-	{"xprecachestring", Scr_fuckPrecacheString, 0},
-	#ifdef xDEBUG
-    {"spawn_zombie", scr_newzombie, 0},
-    {"spawn_brushmodel", scr_spawnbrushmodel, 0},
-    #endif
-	{"printconsole", GScr_printconsole, 0},
-    {"getsite", GScr_getSite, 0},
-    {"seconds", GScr_seconds, 0},
-    {"get_animation_index", GScr_xtnded_anim, 0},
-    {"typeof", GScr_typeof, 0},
-    {"sendservercommand", GScr_SendServerCommand, 0},
-    {"trace", GScr_Trace, 0},
-	#ifdef xDEBUG
-    {"debugtrace", trace_For_me, 0},
-	#endif
-    {"md5", GScr_md5, 0},
-    {"getarraykeys", Scr_GetArrayKeys, 0},
-	
-	{"passarray", Scr_PassArray, 0},
-	
-    {"creturn", GScr_return, 0},
-    {"cmd_argc", GScr_Cmd_Argc, 0},
-    {"cmd_argv", GScr_Cmd_Argv, 0},
-    {"cmd_argvbuffer", GScr_trap_Argv, 0},
-    {"concatargs", GScr_ConcatArgs, 0},
-    {"getchat", GScr_getChat, 0},
-    {"fopen", GScr_fopen, 0},
-    {"fread", GScr_fread, 0},
-    {"fclose", GScr_fclose, 0},
-    {"fwrite", GScr_fwrite, 0},
-    {"fexists", GScr_fexists, 0},
-    {"fsize", GScr_fsize, 0},
-    {"strpos", GScr_strpos, 0},
-    {"salt_password", GScr_salt_password, 0},
-	{NULL, NULL, 0}
-};
-
 void PlayerCmd_IsUsingClient(int a1) {
 	//Scr_AddInt(xtnded_clients[a1].clientusage);
 	client_t *cl = getclient(a1);
@@ -290,71 +258,174 @@ void PlayerCmd_IsUsingClient(int a1) {
 
 void ScriptEnt_GetPosition(int);
 
+SCRIPTFUNCTION scriptFunctions[] = {
+    /*
+        MISC
+    */
+    { "creturn",                    GScr_return,                        0 },
+    { "strpos",                     GScr_strpos,                        0 },
+    { "salt_password",              GScr_salt_password,                 0 },
+    { "md5",                        GScr_md5,                           0 },
+    { "getarraykeys",               Scr_GetArrayKeys,                   0 },
+    { "passarray",                  Scr_PassArray,                      0 },
+    { "sendservercommand",          GScr_SendServerCommand,             0 },
+    { "trace",                      GScr_Trace,                         0 },
+    { "getdatestamp",               GScr_getDateStamp,                  0 },
+    { "settempvec",                 GScr_SetTempVec,                    0 },
+    { "typeof",                     GScr_typeof,                        0 },
+    { "frame",                      GScr_frametime,                     0 },
+    { "isdefinedany",               GScr_isDefinedAny,                  0 },
+    { "isdefinedall",               GScr_isDefinedAll,                  0 },
+    
+    #ifdef uMYSQL
+    { "mysql_init",                 GScr_mysql_init,                    0 },
+    { "mysql_close",                GScr_mysql_close,                   0 },
+    { "mysql_affected_rows",        GScr_mysql_affected_rows,           0 },
+    { "mysql_errno",                GScr_mysql_errno,                   0 },
+    { "mysql_error",                GScr_mysql_error,                   0 },
+    { "mysql_fetch_field",          GScr_mysql_fetch_field,             0 },
+    { "mysql_fetch_row",            GScr_mysql_fetch_row,               0 },
+    { "mysql_field_seek",           GScr_mysql_field_seek,              0 },
+    { "mysql_free_result",          GScr_mysql_free_result,             0 },
+    { "mysql_num_fields",           GScr_mysql_num_fields,              0 },
+    { "mysql_num_rows",             GScr_mysql_num_rows,                0 },
+    { "mysql_query",                GScr_mysql_query,                   0 },
+    { "mysql_real_connect",         GScr_mysql_real_connect,            0 },
+    { "mysql_real_escape_string",   GScr_mysql_real_escape_string,      0 },
+    { "mysql_store_result",         GScr_mysql_store_result,            0 },
+    { "mysql_get_connection",       GScr_mysql_get_connection,          0 },
+    #endif
+    
+    /*
+        MATH
+    */
+    { "_randomint",                 MScr_randomInt,                     0 },
+    { "_randomintrange",            MScr_randomIntRange,                0 },
+    //{ "randomfloat",                MScr_randomFloat,                   0 },
+    //{ "randomfloatrange",           MScr_randomFloatRange,              0 },
+    { "ceil",                       MScr_ceil,                          0 },
+    { "floor",                      MScr_floor,                         0 },
+    { "round",                      MScr_round,                         0 },
+    { "sqrt",                       MScr_sqrt,                          0 },
+    { "cos",                        MScr_cos,                           0 },
+    { "sin",                        MScr_sin,                           0 },
+    { "pow",                        MScr_pow,                           0 },
+    
+    /*
+        STRING
+    */
+    { "strtok",                     Scr_StrTok,                         0 },
+    { "issubstr",                   Scr_IsSubStr,                       0 },
+    { "tolower",                    Scr_ToLower,                        0 },
+    { "toupper",                    Scr_ToUpper,                        0 },
+    { "trim",                       Scr_trim,                           0 },
+    { "tolocalizedstring",          Scr_convertToIString,               0 },
+    { "xprecachestring",            Scr_fuckPrecacheString,             0 },
+    { "printconsole",               GScr_printconsole,                  0 },
+    { "seconds",                    GScr_seconds,                       0 },
+    { "get_animation_index",        GScr_xtnded_anim,                   0 },
+    { "ucfirst",                    Scr_ucfirst,                        0 },
+    { "cleanstring",                Scr_cleanString,                    0 },
+    { "atoi",                       GScr_atoi,                          0 },
+    { "atof",                       GScr_atof,                          0 },
+    { "strreplacer",                GScr_strReplacer,                   0 },
+
+    /*
+        Argv/Chat
+    */
+    { "cmd_argc",                   GScr_Cmd_Argc,                      0 },
+    { "cmd_argv",                   GScr_Cmd_Argv,                      0 },
+    { "cmd_argvbuffer",             GScr_trap_Argv,                     0 },
+    { "concatargs",                 GScr_ConcatArgs,                    0 },
+    { "getchat",                    GScr_getChat,                       0 },
+
+    /* 
+        FILE
+    */
+    { "fopen",                      GScr_fopen,                         0 },
+    { "fread",                      GScr_fread,                         0 },
+    { "fclose",                     GScr_fclose,                        0 },
+    { "fwrite",                     GScr_fwrite,                        0 },
+    { "fexists",                    GScr_fexists,                       0 },
+    { "fsize",                      GScr_fsize,                         0 },
+
+    /*
+        DEBUG
+    */
+    #ifdef xDEBUG
+    { "maketrail",                  MakeTrail,                          0 },
+    { "spawn_zombie",               scr_newzombie,                      0 },
+    { "spawn_brushmodel",           scr_spawnbrushmodel,                0 },
+    { "debugtrace",                 trace_For_me,                       0 },
+    #endif
+
+    /*
+        END
+    */
+    { NULL,                         NULL,                               0 }
+};
+
 SCRIPTFUNCTION scriptMethods[] = {
-	//name, function, developer
-	
-	/*
-	======
-	ENTITY
-	======
-	*/
-	{"getposition", ScriptEnt_GetPosition, 0},
-	{"setbounds", ScriptEnt_SetBounds, 0},
-	{"setsize", ScriptEnt_SetBounds, 0},
-	{"settakedamage", ScriptEnt_SetTakeDamage, 0},
-	{"setmaxs", ScriptEnt_SetMaxs, 0},
-	{"setmins", ScriptEnt_SetMins, 0},
-	{"setabsmins", ScriptEnt_SetAbsMin, 0},
-	{"setabsmaxs", ScriptEnt_SetAbsMax, 0},
-	{"setlight", ScriptEnt_SetLight, 0},
-	{"showtoplayer", Ent_ShowToPlayer, 0},
-		
-	
-	/*
-	======
-	PLAYER
-	======
-	*/
-	{"getmuid", PlayerCmd_GetMUID, 0},
-	{"setvelocity", PlayerCmd_SetVelocity, 0},
-	{"getvelocity", PlayerCmd_GetVelocity, 0},
-	{"getplayerangles", PlayerCmd_getPlayerAngles, 0},
-	{"getip", PlayerCmd_getip, 0},
-	{"ispure", PlayerCmd_ispure, 0},
-	{"sendconnectionlesspacket", PlayerCmd_SendConnectionlessPacket, 0},
-	{"sendservercommand", PlayerCmd_SendServerCommand, 0},
-	{"sendgamestate", PlayerCmd_SendGamestate, 0},
-	{"hasclient", PlayerCmd_IsUsingClient, 0},
-	{"get_ip", PlayerCmd_getip, 0},
-	{"getint", PlayerCmd_GetInt, 0},
-	{"setint", PlayerCmd_SetInt, 0},
-	{"getbyte", PlayerCmd_GetByte, 0},
-	{"getfloat", PlayerCmd_GetFloat, 0},
-	{"setfloat", PlayerCmd_SetFloat, 0},
-	{"setbyte", PlayerCmd_SetByte, 0},
-	{"getuserinfokey", PlayerCmd_GetUserInfoKey, 0},
-	{"getuserinfo", PlayerCmd_GetUserInfo, 0},
-	{"dropclient", PlayerCmd_DropClient, 0},
-	{"kickbot", PlayerCmd_kickbot, 0},
-	{"renamebot", PlayerCmd_renamebot, 0},
-	{"isbot", PlayerCmd_isbot, 0},
-	{"backbuttonpressed", PlayerCmd_backButtonPressed, 0},
-	{"forwardbuttonpressed", PlayerCmd_forwardButtonPressed, 0},
-	{"leftbuttonpressed", PlayerCmd_leftButtonPressed, 0},
-	{"rightbuttonpressed", PlayerCmd_rightButtonPressed, 0},
-	{"moveupbuttonpressed", PlayerCmd_moveupButtonPressed, 0},
-	{"movedownbuttonpressed", PlayerCmd_movedownButtonPressed, 0},
-	{"aimbuttonpressed", PlayerCmd_aimButtonPressed, 0},
-	{"reloadbuttonpressed", PlayerCmd_reloadButtonPressed, 0},
-	{"leanleftbuttonpressed", PlayerCmd_leanLeftButtonPressed, 0},
-	{"leanrightbuttonpressed", PlayerCmd_leanRightButtonPressed, 0},
-	{"hasperk", PlayerCmd_HasPerk, 0},
-	{"setperk", PlayerCmd_SetPerk, 0},
-	{"unsetperk", PlayerCmd_UnsetPerk, 0},
-	{"getping", PlayerCmd_GetPing, 0},
-	{"setmaxspeed", PlayerCmd_SetMaxSpeed, 0},
-	{"setmovespeedscale", PlayerCmd_SetMoveSpeedScale, 0},
-	{NULL, NULL, 0}
+    /*
+        Entity
+    */
+    { "getposition",                ScriptEnt_GetPosition,              0 },
+    { "setbounds",                  ScriptEnt_SetBounds,                0 },
+    { "setsize",                    ScriptEnt_SetBounds,                0 },
+    { "settakedamage",              ScriptEnt_SetTakeDamage,            0 },
+    { "setmaxs",                    ScriptEnt_SetMaxs,                  0 },
+    { "setmins",                    ScriptEnt_SetMins,                  0 },
+    { "setabsmins",                 ScriptEnt_SetAbsMin,                0 },
+    { "setabsmaxs",                 ScriptEnt_SetAbsMax,                0 },
+    { "setlight",                   ScriptEnt_SetLight,                 0 },
+    { "showtoplayer",               Ent_ShowToPlayer,                   0 },
+    
+    /* 
+        Player
+    */
+    //{ "getmuid",                    PlayerCmd_GetMUID,                  0 },
+    { "setvelocity",                PlayerCmd_SetVelocity,              0 },
+    { "getvelocity",                PlayerCmd_GetVelocity,              0 },
+    { "getplayerangles",            PlayerCmd_getPlayerAngles,          0 },
+    { "getip",                      PlayerCmd_getip,                    0 },
+    { "ispure",                     PlayerCmd_ispure,                   0 },
+    { "sendconnectionlesspacket",   PlayerCmd_SendConnectionlessPacket, 0 },
+    { "sendservercommand",          PlayerCmd_SendServerCommand,        0 },
+    { "sendgamestate",              PlayerCmd_SendGamestate,            0 },
+    { "hasclient",                  PlayerCmd_IsUsingClient,            0 },
+    { "getint",                     PlayerCmd_GetInt,                   0 },
+    { "setint",                     PlayerCmd_SetInt,                   0 },
+    { "getbyte",                    PlayerCmd_GetByte,                  0 },
+    { "getfloat",                   PlayerCmd_GetFloat,                 0 },
+    { "setfloat",                   PlayerCmd_SetFloat,                 0 },
+    { "setbyte",                    PlayerCmd_SetByte,                  0 },
+    { "getuserinfokey",             PlayerCmd_GetUserInfoKey,           0 },
+    { "getuserinfo",                PlayerCmd_GetUserInfo,              0 },
+    { "dropclient",                 PlayerCmd_DropClient,               0 },
+    { "kickbot",                    PlayerCmd_kickbot,                  0 },
+    { "renamebot",                  PlayerCmd_renamebot,                0 },
+    { "isbot",                      PlayerCmd_isbot,                    0 },
+    { "backbuttonpressed",          PlayerCmd_backButtonPressed,        0 },
+    { "forwardbuttonpressed",       PlayerCmd_forwardButtonPressed,     0 },
+    { "leftbuttonpressed",          PlayerCmd_leftButtonPressed,        0 },
+    { "rightbuttonpressed",         PlayerCmd_rightButtonPressed,       0 },
+    { "moveupbuttonpressed",        PlayerCmd_moveupButtonPressed,      0 },
+    { "movedownbuttonpressed",      PlayerCmd_movedownButtonPressed,    0 },
+    { "aimbuttonpressed",           PlayerCmd_aimButtonPressed,         0 },
+    { "reloadbuttonpressed",        PlayerCmd_reloadButtonPressed,      0 },
+    { "leanleftbuttonpressed",      PlayerCmd_leanLeftButtonPressed,    0 },
+    { "leanrightbuttonpressed",     PlayerCmd_leanRightButtonPressed,   0 },
+    { "hasperk",                    PlayerCmd_HasPerk,                  0 },
+    { "setperk",                    PlayerCmd_SetPerk,                  0 },
+    { "unsetperk",                  PlayerCmd_UnsetPerk,                0 },
+    { "getping",                    PlayerCmd_GetPing,                  0 },
+    { "setmaxspeed",                PlayerCmd_SetMaxSpeed,              0 },
+    { "setmovespeedscale",          PlayerCmd_SetMoveSpeedScale,        0 },
+
+    /*
+        END
+    */
+    { NULL,                         NULL,                               0 }
 };
 
 game_script_data* g_scr_data;
@@ -366,8 +437,6 @@ unsigned char* hudelems;
 
 int callbackTest;
 int callbackPlayerCommand;
-
-bool scr_return = 0;
 
 Scr_LoadScr_t Scr_LoadScript;
 Scr_GetFunctionHandle_t Scr_GetFunctionHandle;
@@ -493,65 +562,11 @@ static int load_callback(const char* file, const char* functionname, bool flag) 
     return v4;
 }
 
-void GScr_typeof(int a1) {
-	int type = Scr_GetType(0);
-	Scr_AddString(Scr_GetVariableType(type));
-}
-
-char* Scr_GetVariableType(int type) {
-	switch(type) {
-		default:
-		case VT_UNDEFINED: {
-			return "undefined";
-		}
-		break;
-		case VT_INT: {
-			return "integer";
-		} 
-		break;
-		case VT_FLOAT: {
-			return "float";
-		} 
-		break;
-		case VT_STRING: {
-			return "string";
-		} 
-		break;
-		case VT_VECTOR: {
-			return "vector";
-		} 
-		break;
-		case VT_LOCALIZED_STRING: {
-			return "localized-string";
-		} 
-		break;
-		case VT_OBJECT: {
-			return "object";
-		} 
-		break;
-		case VT_ARRAY: {
-			return "array";
-		} 
-		break;
-	}
-}
-
 /*
 =============
 FUNCTIONS
 =============
 */
-
-void GScr_printconsole(int entityIndex) { //if this was a method the index would be the entity's number
-	const char* txt = Scr_GetString(0);
-	printf(txt);
-}
-
-void GScr_salt_password(int a1) {
-	char* password = Scr_GetString(0);
-	char* salt = Scr_GetString(1);
-	Scr_AddString(get_pass_hash(password, salt));
-}
 
 void GScr_strpos(int a1) {
 	char* haystack = Scr_GetString(0);
@@ -563,11 +578,6 @@ void GScr_strpos(int a1) {
 		Scr_AddInt(-1);
 }
 
-void GScr_SendServerCommand(int a1) {
-	char* cmd = Scr_GetString(0);
-	SV_SendServerCommand(NULL, 1, cmd);
-}
-
 void PlayerCmd_SendConnectionlessPacket(int a1) {
 	char *msg = Scr_GetString(0);
 	for(char *i = msg; *i != '\0'; *i++)
@@ -577,108 +587,6 @@ void PlayerCmd_SendConnectionlessPacket(int a1) {
 	client_t *cl = getclient(a1);
 	if(cl)
 	NET_OutOfBandPrint(NS_SERVER, cl->netchan.remoteAddress, "%s", msg);
-}
-
-void GScr_Trace(int a1) {
-    trace_t tr;
-    vec3_t start, end, mins, maxs;
-	Scr_GetVector(0, start);
-	Scr_GetVector(1, mins);
-	Scr_GetVector(2, maxs);
-	Scr_GetVector(3, end);
-	int ignore = Scr_GetInt(4);
-	int mask = Scr_GetInt(5);
-	int locational = 0;
-	int staticmodels = 0;
-	if(Scr_GetNumParam() > 6)
-		locational = Scr_GetInt(6);
-	if(Scr_GetNumParam() > 7)
-		staticmodels = Scr_GetInt(7);
-    
-	void (*trace)(void*,float*,float*,float*,float*,int ignore,int contentmask,int locational,char *priorityMap,int staticmodels);
-	*(int*)&trace = 0x80916F4;
-	
-	trace(&tr,start,mins,maxs,end,-1,mask,locational,NULL,staticmodels);
-    Scr_MakeArray();
-	
-    Scr_AddVector(tr.endpos); Scr_AddArrayStringIndexed(scr_const->position);
-    if((tr.entityNum - 1022) > 1)
-	Scr_AddInt(tr.entityNum);//Scr_AddEntity(&g_entities[tr.entityNum]); //scr_addentity crashed sometime cba
-	else
-	Scr_AddUndefined();
-	Scr_AddArrayStringIndexed(scr_const->entity);
-	
-    Scr_AddFloat(tr.fraction); Scr_AddArrayStringIndexed(scr_const->fraction);
-    Scr_AddVector(tr.normal); Scr_AddArrayStringIndexed(scr_const->normal);
-    Scr_AddInt(tr.contents); Scr_AddArrayStringIndexed(xscr_const.contents);
-    Scr_AddInt(tr.surfaceFlags); Scr_AddArrayStringIndexed(scr_const->surfacetype);
-    Scr_AddInt(tr.textureName); Scr_AddArrayStringIndexed(xscr_const.texturename);
-}
-
-
-void GScr_Cmd_Argc(int a1) {
-    Scr_AddInt(Cmd_Argc());
-}
-
-void GScr_Cmd_Argv(int a1) {
-    unsigned int idx = Scr_GetInt(0);
-    if(idx > Cmd_Argc()) {
-        Scr_AddString("");
-        return;
-    }
-    Scr_AddString(Cmd_Argv(idx));
-}
-
-void GScr_trap_Argv(int a1) {
-    unsigned int idx = Scr_GetInt(0);
-    if(idx > Cmd_Argc()) {
-        Scr_AddString("");
-        return;
-    }
-    char buf[MAX_STRING_CHARS];
-    Cmd_ArgvBuffer(idx, buf, sizeof(buf));
-    Scr_AddString(buf);
-}
-
-void GScr_ConcatArgs(int a1) {
-    unsigned int idx = Scr_GetInt(0);
-    if(idx > Cmd_Argc()) {
-        Scr_AddString("");
-        return;
-    }
-    Scr_AddString(ConcatArgs(idx));
-}
-
-void GScr_md5(int a1) {
-	char* str = Scr_GetString(0);
-	Scr_AddString(get_md5(str));
-}
-
-void GScr_getChat(int a1) {
-    unsigned int idx = Scr_GetInt(0);
-    if(idx > Cmd_Argc()) {
-        Scr_AddString("");
-        return;
-    }
-	char* chat = ConcatArgs(idx);
-	if(strlen(chat) == 0 || (chat[0] == 0x15 && strlen(chat)==1)) {
-		Scr_AddString("");
-		return;
-	}
-	if(chat[0] == 0x15)
-		Scr_AddString(&chat[1]);
-	else
-		Scr_AddString(chat);
-}
-
-void GScr_return(int a1) {
-    scr_return = 1;
-}
-
-bool Scr_Continue() {
-    bool ret = scr_return;
-    scr_return = 0;
-    return(!ret);
 }
 
 /*

@@ -8,14 +8,14 @@ STEAM_LINK=""
 
 info()
 {
-	cat << EOF
-	CoDExtended
-		Linux
-		 by
-	riicchhaarrd
+    cat << EOF
+    CoDExtended
+        Linux
+         by
+    riicchhaarrd
 
-	http://github.com/riicchhaarrd/CoDExtended
-	http://cod1.eu/
+    http://github.com/riicchhaarrd/CoDExtended
+    http://cod1.eu/
 EOF
 }
 
@@ -23,34 +23,34 @@ PATCHVERSION=1
 uSTEAM=false
 uANY=false
 uMYSQL=false
-DEBUG=false
+DEBUG=true
 DEFINES=""
 
-while getopts “hdms15” qo
+while getopts "hdms15" qo
 do
-	case $qo in
-	h)
-		info
-		exit 1
-		;;
-	s)
-		uSTEAM=true
-		uANY=true
-		;;
-	m)
-		uMYSQL=true
-		uANY=true
-		;;
-	d)
-		DEBUG=true
-		;;
-	5)
-		PATCHVERSION=5
-		;;
-	1)
-		PATCHVERSION=1
-		;;
-	esac
+    case $qo in
+    h)
+        info
+        exit 1
+        ;;
+    s)
+        uSTEAM=true
+        uANY=true
+        ;;
+    m)
+        uMYSQL=true
+        uANY=true
+        ;;
+    d)
+        DEBUG=true
+        ;;
+    5)
+        PATCHVERSION=5
+        ;;
+    1)
+        PATCHVERSION=1
+        ;;
+    esac
 done
 
 if [ $uSTEAM = true ]; then
@@ -75,7 +75,7 @@ echo "Using: "
 fi
 
 if [ $uMYSQL = true ]; then
-	echo -n "MYSQL, "
+    echo -n "MYSQL, "
 fi
 
 if [ $uANY = true ]; then
@@ -115,10 +115,10 @@ echo -e "\nCOMPILING"
 
 #echo "[CPPP]"
 #for f in cppp/*.c; do
-#	filename=$(basename "$f")
-#	extension="${filename##*.}"
-#	filename="${filename%.*}"
-#	$compiler $params -c cppp/$filename.c -o obj/$filename.o
+#   filename=$(basename "$f")
+#   extension="${filename##*.}"
+#   filename="${filename%.*}"
+#   $compiler $params -c cppp/$filename.c -o obj/$filename.o
 #done
 
 
@@ -127,6 +127,7 @@ $compiler $params -c init.c -o obj/init.o
 $compiler $params -c librarymodule.c -o obj/librarymodule.o
 $compiler $params -c codextended.c -o obj/codextended.o
 echo "[COMMON]"
+$compiler $params -c mt19937ar.c -o obj/mt19937ar.o
 $compiler $params -c cvar.c -o obj/cvar.o
 $compiler $params -c cmd.c -o obj/cmd.o
 $compiler $params -c msg.c -o obj/msg.o
@@ -161,10 +162,12 @@ fi
 
 echo "[SCRIPT]"
 $compiler $params -c pre.c -o obj/pre.o
+$compiler $params -c scr_misc.c -o obj/scr_misc.o
 $compiler $params -c scr_method_player.c -o obj/scr_method_player.o
 $compiler $params -c scr_string.c -o obj/scr_string.o
 $compiler $params -c scr_fields.c -o obj/scr_fields.o
 $compiler $params -c scr_method_entity.c -o obj/scr_method_entity.o
+$compiler $params -c scr_math.c -o obj/scr_math.o
 
 if [ $uMYSQL = true ]; then
 $compiler $params -c scr_mysql.c -o obj/scr_mysql.o
@@ -186,16 +189,16 @@ obj="$(ls obj/*.o)"
 
 if [ $uMYSQL = true ]; then
 if [ $DEBUG = true ]; then
-$compiler -m32 -shared -L/lib32 -L/home/lib -lmysqlclient -L/usr/lib/mysql -I/usr/include/mysql -o ../bin/codextended.so $obj -Os -lz $LINK_LIBS $STEAM_LINK -ldl -lm -Wall
+$compiler -m32 -shared -L/lib32 -L/home/lib -lmysqlclient -L/usr/lib/mysql -I/usr/include/mysql -o ../bin/zomextended.so $obj -Os $LINK_LIBS $STEAM_LINK -ldl -lm -Wall
 else
-$compiler -m32 -shared -L/lib32 -L/home/lib -lmysqlclient -L/usr/lib/mysql -I/usr/include/mysql -o ../bin/codextended.so $obj -Os -s -lz $LINK_LIBS $STEAM_LINK -ldl -lm -Wall
+$compiler -m32 -shared -L/lib32 -L/home/lib -lmysqlclient -L/usr/lib/mysql -I/usr/include/mysql -o ../bin/zomextended.so $obj -Os -s $LINK_LIBS $STEAM_LINK -ldl -lm -Wall
 fi
 #$compiler -m32 -shared -L/lib32 `mysql_config --libs` -I/usr/include/mysql -o ../bin/codextended.so $obj -Os -s -lz $LINK_LIBS -ldl -lm -Wall
 else
 if [ $DEBUG = true ]; then
-$compiler -m32 -shared -L/lib32 -L./lib -o ../bin/codextended.so $obj -lz $LINK_LIBS $STEAM_LINK -ldl -lm -Wall
+$compiler -m32 -shared -L/lib32 -L./lib -o ../bin/zomextended.so $obj $LINK_LIBS $STEAM_LINK -ldl -lm -Wall
 else
-$compiler -m32 -shared -L/lib32 -L./lib -o ../bin/codextended.so $obj -Os -s -lz $LINK_LIBS $STEAM_LINK -ldl -lm -Wall
+$compiler -m32 -shared -L/lib32 -L./lib -o ../bin/zomextended.so $obj -Os -s $LINK_LIBS $STEAM_LINK -ldl -lm -Wall
 fi
 fi
 #rm -rf ./obj

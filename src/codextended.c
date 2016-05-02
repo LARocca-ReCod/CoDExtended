@@ -221,7 +221,8 @@ void CoDExtended() {
 	mprotect((void *)0x08048000, 0x135000, PROT_READ | PROT_WRITE | PROT_EXEC);
 	*(int*)0x804A698 = (int)main;
 	
-	srand (time(NULL));
+	srand( time( NULL ) * 639612292 );
+	init_genrand( time( NULL ) * 639612292 );
 	//mtrace();
 
 	#ifdef STEAM_SUPPORT

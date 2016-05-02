@@ -70,7 +70,7 @@ void Scr_trim(int a1) {
 	
 	char *str = Scr_GetString(0);
 	
-	char *tmp = (char*)xmalloc(strlen(str) + 1);
+	char *tmp = (char*)malloc(strlen(str) + 1);
 	size_t tmp_idx = 0;
 	
 	size_t str_size = strlen(str);
@@ -171,4 +171,178 @@ void Scr_ucfirst(int a1) {
 	*s = toupper(*s);
 	Scr_AddString(s);
 	free(s);
+}
+
+
+typedef enum {
+    SR_NONE = 0,
+    SR_ALPHA,
+    SR_PRINT,
+    SR_GRAPH,
+    SR_NUMERIC,
+    SR_ONLYNUMBERS,
+    SR_VECTOR,
+    SR_UPPER,
+    SR_LOWER,
+    SR_END
+} strReplacer_types;
+
+void Scr_cleanString( int entityIndex ) {
+    if ( !paramCheck( 1, VT_STRING ) ) {
+        Scr_AddString( "" );
+        return;
+    }
+
+    char *str = Scr_GetString( 0 );
+
+    bool ignorespaces = false;
+    if ( Scr_GetNumParam() == 2 && Scr_GetType( 1 ) == VT_INT )
+        ignorespaces = Scr_GetInt( 1 ) == 0 ? false : true;
+
+    char *clean = xstrdup( str );
+
+    if ( ignorespaces )
+        Scr_AddString( strReplacer( clean, SR_GRAPH ) );
+    else
+        Scr_AddString( strReplacer( clean, SR_PRINT ) );
+
+    if ( clean != NULL )
+        free( clean );
+}
+
+void GScr_atoi( int entityIndex ) {
+    if ( !paramCheck( 1, VT_STRING ) ) {
+        Scr_AddInt( 0 );
+        return;
+    }
+
+    char *str = Scr_GetString( 0 );
+    char *end;
+
+    char *clean = xstrdup( str );
+    clean = strReplacer( clean, SR_NUMERIC );
+
+    if ( strlen( clean ) == 0 ) {
+        Scr_AddInt( 0 );
+
+        if ( clean != NULL )
+            free( clean );
+        return;
+    }
+
+    long int v = strtol( clean, &end, 0 );
+    Scr_AddInt( v );
+
+    if ( clean != NULL )
+        free( clean );
+}
+
+void GScr_atof( int entityIndex ) {
+    if ( !paramCheck( 1, VT_STRING ) ) {
+        Scr_AddFloat( 0.0 );
+        return;
+    }
+
+    char *str = Scr_GetString( 0 );
+    char *end;
+
+    char *clean = xstrdup( str );
+    clean = strReplacer( clean, SR_NUMERIC );
+
+    if ( strlen( clean ) == 0 ) {
+        Scr_AddFloat( 0.0 );
+
+        if ( clean != NULL )
+            free( clean );
+        return;
+    }
+
+    double v = strtod( clean, &end );
+    Scr_AddFloat( v );
+
+    if ( clean != NULL )
+        free( clean );
+}
+
+void GScr_strReplacer( int entityIndex ) {
+    if ( !paramCheck( 2, VT_STRING, VT_INT ) ) {
+        Scr_AddString( "" );
+        return;
+    }
+
+    char *str = Scr_GetString( 0 );
+    int method = Scr_GetInt( 1 );
+
+    // malloc and free are necessary otherwise 
+    // strReplacer will affect the actual string in-game
+    // and we don't want to cause problems
+    char *rep = xstrdup( str );
+    Scr_AddString( strReplacer( rep, method ) );
+
+    if ( rep != NULL )
+       free( rep );
+}
+
+char *strReplacer( char *str, int method ) {
+    char *rep = str;
+
+    int i = 0, j = 0;
+    for ( ; i < strlen( str ); i++ ) {
+        bool copy = false;
+        bool ignoreextrachars = true;
+
+        switch ( method ) {
+            case SR_LOWER:
+            case SR_UPPER:
+                if ( isprint( str[ i ] ) )
+                    ignoreextrachars = false;
+                break;
+            case SR_ALPHA:
+                // only letters
+                if ( isalpha( str[ i ] ) )
+                    copy = true;
+                break;
+            case SR_PRINT:
+                // any printable chars
+                if ( isprint( str[ i ] ) )
+                    copy = true;
+                break;
+            case SR_GRAPH:
+                // any printable chars expect spaces
+                if ( isgraph( str[ i ] ) )
+                    copy = true;
+                break;
+            case SR_NUMERIC:
+                // numbers + - , E e
+                if ( isdigit( str[ i ] ) || str[ i ] == 0x2d || str[ i ] == 0x2b || str[ i ] == 0x2e )
+                    copy = true;
+                break;
+            case SR_ONLYNUMBERS:
+                // only numbers
+                if ( isdigit( str[ i ] ) )
+                    copy = true;
+                break;
+            case SR_VECTOR:
+                // numbers - ( ) ,
+                if ( isdigit( str[ i ] ) || str[ i ] == 0x28 || str[ i ] == 0x29 || str[ i ] == 0x2b || str[ i ] == 0x2e )
+                    copy = true;
+                break;
+        }
+
+        if ( copy || !ignoreextrachars ) {
+            if ( method == SR_LOWER && isalpha( str[ i ] ) )
+                rep[ j ] = tolower( str[ i ] );
+            else if ( method == SR_UPPER && isalpha( str[ i ] ) ) 
+                rep[ j ] = toupper( str[ i ] );
+            else
+                rep[ j ] = str[ i ];
+
+            j++;
+        }
+    }
+
+    if ( j < i ) 
+        rep[ j ] = '\0';
+
+    return rep;
 }

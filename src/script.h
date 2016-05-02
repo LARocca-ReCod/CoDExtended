@@ -349,25 +349,40 @@ char* Scr_GetVariableType(int type);
 
 /*
 =============
+misc
+=============
+*/
+
+void GScr_typeof(int);
+void GScr_printconsole(int);
+void GScr_salt_password(int);
+void GScr_SendServerCommand(int);
+void GScr_Trace(int);
+void GScr_Cmd_Argv(int);
+void GScr_Cmd_Argc(int);
+void GScr_trap_Argv(int);
+void GScr_ConcatArgs(int);
+void GScr_md5(int);
+void GScr_getChat(int);
+void GScr_getDateStamp(int);
+void GScr_return(int);
+bool Scr_Continue();
+void GScr_frametime(int);
+void GScr_isDefinedAny(int);
+void GScr_isDefinedAll(int);
+
+/*
+=============
 FUNCTIONS
 =============
 */
 
-void GScr_printconsole(int);
-void GScr_Trace(int);
-void GScr_trap_Argv(int);
-void GScr_ConcatArgs(int);
-void GScr_getChat(int);
-void GScr_Cmd_Argv(int);
-void GScr_Cmd_Argc(int);
-void GScr_return(int);
-
-void GScr_salt_password(int a1);
-void GScr_strpos(int);
-
 void GScr_SpawnAnimEnt(int);
 void GScr_callspawn(int);
 void GScr_GetAnimIndex(int);
+
+bool paramCheck(int,...);
+void parameterError(const char*,...);
 
 /*
 =============
@@ -382,6 +397,12 @@ void Scr_IsSubStr(int);
 void Scr_passArray(int);
 void Scr_trim(int);
 void Scr_convertToIString(int a1);
+void GScr_strpos(int);
+void GScr_strReplacer(int);
+char *strReplacer(char*,int);
+void Scr_cleanString(int);
+void GScr_atoi(int);
+void GScr_atof(int);
 
 /*
 =============
@@ -389,9 +410,18 @@ MATH
 =============
 */
 
+void MScr_randomInt(int);
+void MScr_randomIntRange(int);
+void MScr_randomFloat(int);
+void MScr_randomFloatRange(int);
+
+void MScr_ceil(int);
+void MScr_floor(int);
+void MScr_round(int);
 void MScr_cos(int);
 void MScr_sin(int);
 void MScr_sqrt(int);
+void MScr_pow(int);
 
 /*
 =====
@@ -404,13 +434,6 @@ void GScr_xor(int);
 void GScr_rshift(int);
 void GScr_lshift(int);
 void GScr_not(int);
-
-/*
-======
-CRYPTO
-======
-*/
-void GScr_md5(int);
 
 /*
 =============
@@ -478,6 +501,7 @@ void PlayerCmd_HasPerk(int);
 void PlayerCmd_SetMaxSpeed(int);
 void PlayerCmd_GetPing(int);
 void PlayerCmd_SetMoveSpeedScale(int);
+void PlayerCmd_IsUsingClient(int);
 
 /*
 =============
@@ -485,6 +509,7 @@ ENTITY METHODS
 =============
 */
 
+void ScriptEnt_GetPosition(int);
 void ScriptEnt_SetBounds(int);
 void ScriptEnt_SetBoundCorners(int);
 void ScriptEnt_SetTakeDamage(int);
@@ -504,6 +529,7 @@ FILE FUNCTIONS
 void GScr_fopen(int);
 void GScr_fclose(int);
 void GScr_fread(int);
+void GScr_freadchunk(int);
 void GScr_fexists(int);
 void GScr_fsize(int);
 void GScr_fwrite(int);
