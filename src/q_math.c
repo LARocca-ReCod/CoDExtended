@@ -596,7 +596,7 @@ float _RadiusFromBounds( const vec3_t mins, const vec3_t maxs ) {
 		corner[i] = a > b ? a : b;
 	}
 
-	return VectorLength( corner );
+	return _VectorLength( corner );
 }
 
 
@@ -699,7 +699,7 @@ vec_t _Distance( const vec3_t p1, const vec3_t p2 ) {
 	vec3_t v;
 
 	VectorSubtract( p2, p1, v );
-	return VectorLength( v );
+	return _VectorLength( v );
 }
 
 vec_t _DistanceSquared( const vec3_t p1, const vec3_t p2 ) {
@@ -908,6 +908,6 @@ float _VectorDistance( vec3_t v1, vec3_t v2 ) {
 	vec3_t dir;
 
 	VectorSubtract( v2, v1, dir );
-	return VectorLength( dir );
+	return _VectorLength( dir );
 }
 // done.

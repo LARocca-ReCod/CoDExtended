@@ -170,6 +170,11 @@ typedef struct {
 typedef struct {
 	short texturename;
 	short contents;
+
+	// zomextended
+	short id;
+	short type;
+	// zomextended
 	
 	//assumingly from perk > MAX_PERKS
 	short perks[MAX_PERKS];
@@ -346,6 +351,18 @@ extern SL_GetString_t SL_GetString;
 
 void scriptInitializing();
 char* Scr_GetVariableType(int type);
+
+/*
+=============
+waypoints
+=============
+*/
+
+void GScr_wp_init( int );
+void GScr_wp_deinit( int );
+void GScr_wp_getByID( int );
+void GScr_wp_getClosest( int );
+void GScr_wp_getXClosest( int );
 
 /*
 =============

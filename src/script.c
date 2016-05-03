@@ -260,6 +260,15 @@ void ScriptEnt_GetPosition(int);
 
 SCRIPTFUNCTION scriptFunctions[] = {
     /*
+        waypoints
+    */
+    { "wp_init",                    GScr_wp_init,                       0 },
+    { "wp_deinit",                  GScr_wp_deinit,                     0 },
+    { "wp_getbyid",                 GScr_wp_getByID,                    0 },
+    { "wp_getclosest",              GScr_wp_getClosest,                 0 },
+    { "wp_getxclosest",             GScr_wp_getXClosest,                0 },
+
+    /*
         MISC
     */
     { "creturn",                    GScr_return,                        0 },
@@ -675,6 +684,11 @@ void Scr_LoadConsts() {
 	xscr_const.texturename = Scr_AllocString("texturename", 1);
 	xscr_const.contents = Scr_AllocString("contents", 1);
 	xscr_const.perks[PERK_QUICK_RELOAD] = Scr_AllocString("sleight_of_hand", 1);
+
+    // zomextended
+    xscr_const.id = Scr_AllocString( "id", 1 );
+    xscr_const.type = Scr_AllocString( "type", 1 );
+    // zomextended
 }
 
 void _Scr_StartupGameType() {

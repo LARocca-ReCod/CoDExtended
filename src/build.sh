@@ -168,6 +168,7 @@ $compiler $params -c scr_string.c -o obj/scr_string.o
 $compiler $params -c scr_fields.c -o obj/scr_fields.o
 $compiler $params -c scr_method_entity.c -o obj/scr_method_entity.o
 $compiler $params -c scr_math.c -o obj/scr_math.o
+$compiler $params -c scr_waypoints.c -o obj/scr_waypoints.o
 
 if [ $uMYSQL = true ]; then
 $compiler $params -c scr_mysql.c -o obj/scr_mysql.o
@@ -189,14 +190,14 @@ obj="$(ls obj/*.o)"
 
 if [ $uMYSQL = true ]; then
 if [ $DEBUG = true ]; then
-$compiler -m32 -shared -L/lib32 -L/home/lib -lmysqlclient -L/usr/lib/mysql -I/usr/include/mysql -o ../bin/zomextended.so $obj -Os $LINK_LIBS $STEAM_LINK -ldl -lm -Wall
+$compiler -g -m32 -shared -L/lib32 -L/home/lib -lmysqlclient -L/usr/lib/mysql -I/usr/include/mysql -o ../bin/zomextended.so $obj -Og $LINK_LIBS $STEAM_LINK -ldl -lm -Wall
 else
 $compiler -m32 -shared -L/lib32 -L/home/lib -lmysqlclient -L/usr/lib/mysql -I/usr/include/mysql -o ../bin/zomextended.so $obj -Os -s $LINK_LIBS $STEAM_LINK -ldl -lm -Wall
 fi
 #$compiler -m32 -shared -L/lib32 `mysql_config --libs` -I/usr/include/mysql -o ../bin/codextended.so $obj -Os -s -lz $LINK_LIBS -ldl -lm -Wall
 else
 if [ $DEBUG = true ]; then
-$compiler -m32 -shared -L/lib32 -L./lib -o ../bin/zomextended.so $obj $LINK_LIBS $STEAM_LINK -ldl -lm -Wall
+$compiler -g -m32 -shared -L/lib32 -L./lib -o ../bin/zomextended.so $obj -Og $LINK_LIBS $STEAM_LINK -ldl -lm -Wall
 else
 $compiler -m32 -shared -L/lib32 -L./lib -o ../bin/zomextended.so $obj -Os -s $LINK_LIBS $STEAM_LINK -ldl -lm -Wall
 fi
