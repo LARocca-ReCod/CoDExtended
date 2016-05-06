@@ -36,6 +36,8 @@ typedef enum {
 
     // keep up to date with gsc code
     WP_DEFAULT,
+
+    WP_IGNORE,  // used to tell bots not to go here
     WP_SPAWN,
     WP_SPAWNEND,
     WP_SPAWNDROP,
@@ -56,6 +58,8 @@ char *wp_tostr( int type ) {
         case WP_HEAD:       return "wp_head";
 
         case WP_DEFAULT:    return "wp_default";
+
+        case WP_IGNORE:     return "wp_ignore";
         case WP_SPAWN:      return "wp_spawn";
         case WP_SPAWNEND:   return "wp_spawnend";
         case WP_SPAWNDROP:  return "wp_spawndrop";
@@ -67,7 +71,7 @@ char *wp_tostr( int type ) {
         case WP_FALL:       return "wp_fall";
         case WP_PRONE:      return "wp_prone";
 
-        case WP_NONE:       
+        case WP_NONE:  
         default:            return "none";
     }
 }
