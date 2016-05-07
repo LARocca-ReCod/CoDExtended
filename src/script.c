@@ -271,10 +271,12 @@ SCRIPTFUNCTION scriptFunctions[] = {
     /*
         MISC
     */
+    { "errno",                      GScr_errno,                         0 },
+    { "errnostr",                   GScr_errnostr,                      0 },
     { "creturn",                    GScr_return,                        0 },
     { "strpos",                     GScr_strpos,                        0 },
-    { "salt_password",              GScr_salt_password,                 0 },
-    { "md5",                        GScr_md5,                           0 },
+    //{ "salt_password",              GScr_salt_password,                 0 },
+    //{ "md5",                        GScr_md5,                           0 },
     { "getarraykeys",               Scr_GetArrayKeys,                   0 },
     { "passarray",                  Scr_PassArray,                      0 },
     { "sendservercommand",          GScr_SendServerCommand,             0 },
@@ -353,6 +355,8 @@ SCRIPTFUNCTION scriptFunctions[] = {
     */
     { "fopen",                      GScr_fopen,                         0 },
     { "fread",                      GScr_fread,                         0 },
+    { "freadline",                  GScr_freadline,                     0 },
+    { "freadfile",                  GScr_freadfile,                     0 },
     { "fclose",                     GScr_fclose,                        0 },
     { "fwrite",                     GScr_fwrite,                        0 },
     { "fexists",                    GScr_fexists,                       0 },
@@ -596,88 +600,6 @@ void PlayerCmd_SendConnectionlessPacket(int a1) {
 	client_t *cl = getclient(a1);
 	if(cl)
 	NET_OutOfBandPrint(NS_SERVER, cl->netchan.remoteAddress, "%s", msg);
-}
-
-/*
-=============
-FILE FUNCTIONS
-=============
-*/
-
-void GScr_fopen(int entityIndex) {
-    char* name = Scr_GetString(0);
-    char* mode = Scr_GetString(1);
-    FILE* f = fopen(name, mode);
-    if(f)
-        Scr_AddInt((int)(f));
-    else
-        Scr_AddInt(-1);
-}
-
-void GScr_fexists(int entityIndex) {
-    char* name = Scr_GetString(0);
-	FILE* f;
-    if((f = fopen(name, "r"))) {
-        fclose(f);
-        Scr_AddBool(true);
-    } else {
-        Scr_AddBool(false);
-    }
-}
-
-void GScr_fread(int entityIndex) {
-	char *buf = NULL;
-	size_t size = 0;
-	
-    int len = Scr_GetInt(0);
-    FILE *f = (FILE*)(Scr_GetInt(1));
-    
-	if(f == NULL) {
-        Scr_AddUndefined();
-    } else {
-		fseek(f, 0, SEEK_END);
-        size = ftell(f);
-		rewind(f);
-        buf = (char *) malloc(size);
-		fread(buf, size, 1, f);
-        Scr_AddString(buf);
-		free(buf);
-    }
-}
-
-void GScr_fwrite(int entityIndex) {
-    char* text = Scr_GetString(0);
-    FILE *f = (FILE*)(Scr_GetInt(1));
-    if(f == NULL) {
-        Scr_AddBool(false);
-    } else {
-        Scr_AddBool(true);
-        fprintf(f, text);
-    }
-}
-
-void GScr_fsize(int entityIndex) {
-    char* name = Scr_GetString(0);
-    FILE *f = fopen(name, "r");
-    size_t len;
-    if(f) {
-        fseek(f, 0, SEEK_END);
-        len = ftell(f);
-        rewind(f);
-        Scr_AddInt((int)len);
-    } else {
-        Scr_AddInt(-1);
-    }
-}
-
-void GScr_fclose(int entityIndex) {
-    FILE *f = (FILE*)(Scr_GetInt(0));
-    if(f) {
-        Scr_AddBool(true);
-        fclose(f);
-    } else {
-        Scr_AddBool(false);
-    }
 }
 
 void Scr_LoadConsts() {

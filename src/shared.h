@@ -36,6 +36,7 @@
 #include <stdbool.h>
 #include <sys/types.h>
 #include <stdint.h>
+#include <errno.h>
 #include "util.h"
 #include "surfaceflags.h"
 #include "build.txt"

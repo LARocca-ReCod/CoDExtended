@@ -163,6 +163,7 @@ fi
 echo "[SCRIPT]"
 $compiler $params -c pre.c -o obj/pre.o
 $compiler $params -c scr_misc.c -o obj/scr_misc.o
+$compiler $params -c scr_io.c -o obj/scr_io.o
 $compiler $params -c scr_method_player.c -o obj/scr_method_player.o
 $compiler $params -c scr_string.c -o obj/scr_string.o
 $compiler $params -c scr_fields.c -o obj/scr_fields.o

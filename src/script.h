@@ -352,6 +352,8 @@ extern SL_GetString_t SL_GetString;
 void scriptInitializing();
 char* Scr_GetVariableType(int type);
 
+char *xstrdup(char *str);
+
 /*
 =============
 waypoints
@@ -369,6 +371,10 @@ void GScr_wp_getXClosest( int );
 misc
 =============
 */
+
+int _gscr_errno;
+void GScr_errno(int);
+void GScr_errnostr(int);
 
 void GScr_typeof(int);
 void GScr_printconsole(int);
@@ -546,7 +552,8 @@ FILE FUNCTIONS
 void GScr_fopen(int);
 void GScr_fclose(int);
 void GScr_fread(int);
-void GScr_freadchunk(int);
+void GScr_freadline(int);
+void GScr_freadfile(int);
 void GScr_fexists(int);
 void GScr_fsize(int);
 void GScr_fwrite(int);

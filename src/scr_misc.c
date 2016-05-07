@@ -17,6 +17,22 @@
 
 #include "script.h"
 
+void GScr_errno( int entityIndex ) {
+    Scr_AddInt( _gscr_errno );
+}
+
+void GScr_errnostr( int entityIndex ) {
+    if ( !paramCheck( 1, VT_INT ) ) {
+        Scr_AddString( "" );
+        return;
+    }
+
+    int err = Scr_GetInt( 0 );
+    char *strerr = xstrdup( strerror( err ) );
+    Scr_AddString( strerr );
+    free( strerr );
+}
+
 void GScr_typeof( int entityIndex ) {
     int type = Scr_GetType( 0 );
     Scr_AddString( Scr_GetVariableType( type ) );
